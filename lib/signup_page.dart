@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'Home.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -9,6 +10,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   String name = "", email = "", password = "";
+  bool isChecked = false;
 
   TextEditingController nameController = new TextEditingController();
 
@@ -66,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
           children: [
             Text(
               'Sign Up',
-              style: TextStyle(
+              style: GoogleFonts.acme(
                 fontSize: 30,
                 fontWeight: FontWeight.w600,
               ),
@@ -135,8 +137,23 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(height: 8),
             Row(
               children: [
-                Checkbox(value: false, onChanged: (bool? value) {}),
-                Text('I agree with Terms & Conditions'),
+                Checkbox(
+                    value: isChecked,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        isChecked = value ?? false;
+                      });
+                    }),
+                GestureDetector(
+                  onTap: () {},
+                  child: Text(
+                    'I agree with Terms & Conditions',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 8),

@@ -1,5 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:user_authentication/forgotPassword.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'Home.dart';
 
@@ -9,6 +14,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   String email = "", password = "";
   bool rememberMe = false;
 
@@ -19,13 +25,11 @@ class _SignInPageState extends State<SignInPage> {
 
   userLogin() async {
     try {
-      print(2);
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => Home()));
-      print('login successfully');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -45,6 +49,56 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  Future<User?> signInWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        return userCredential.user;
+      } on FirebaseAuthException catch (e) {
+        print(e.message);
+      }
+    }
+    return null;
+  }
+
+  /*Future<User?> signInWithFacebook() async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+
+      if (result.status == LoginStatus.success) {
+        final AccessToken accessToken = result.accessToken!;
+        final AuthCredential credential = FacebookAuthProvider.credential(accessToken.token);
+
+        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        return userCredential.user;
+      } else {
+        print(result.status);
+        print(result.message);
+      }
+    } on FirebaseAuthException catch (e) {
+      print(e.message);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+            e.message ?? "An error occurred",
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ),
+      );
+    }
+    return null;
+  }
+
+*/
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -58,7 +112,7 @@ class _SignInPageState extends State<SignInPage> {
           children: [
             Text(
               'Sign In',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
+              style: GoogleFonts.acme(fontSize: 30, fontWeight: FontWeight.w600),
             ),
             SizedBox(
               height: 10,
@@ -126,7 +180,13 @@ class _SignInPageState extends State<SignInPage> {
                   ],
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ForgotPassword(),
+                        ));
+                  },
                   child: Text('Forgot Password?'),
                 ),
               ],
@@ -160,20 +220,16 @@ class _SignInPageState extends State<SignInPage> {
             Text('Or', style: TextStyle(color: Colors.grey)),
             SizedBox(height: 8),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                signInWithGoogle();
+              },
               icon: Icon(Icons.login),
               label: Text('Continue With Google'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
             ),
             ElevatedButton.icon(
               onPressed: () {
-                if (_formkey.currentState!.validate()) {
-                  setState(() {
-                    email = mailController.text;
-                    password = passwordController.text;
-                  });
-                }
-                userLogin();
+                //signInWithFacebook();
               },
               icon: Icon(Icons.facebook),
               label: Text('Continue With Facebook'),
