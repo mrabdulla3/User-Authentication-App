@@ -1,12 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:user_authentication/forgotPassword.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'home.dart';
 
-import 'Home.dart';
 
 class SignInPage extends StatefulWidget {
   @override
@@ -17,6 +15,7 @@ class _SignInPageState extends State<SignInPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String email = "", password = "";
   bool rememberMe = false;
+  bool _paaswordVisible=false;
 
   TextEditingController mailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
@@ -25,11 +24,11 @@ class _SignInPageState extends State<SignInPage> {
 
   userLogin() async {
     try {
-      await FirebaseAuth.instance
+      UserCredential userCredential=await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Home()));
+          context, MaterialPageRoute(builder: (context) => Home(user: userCredential.user!)));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -51,16 +50,19 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<User?> signInWithGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
-    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
     if (googleSignInAccount != null) {
-      final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
         idToken: googleSignInAuthentication.idToken,
       );
 
       try {
-        final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        final UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
         return userCredential.user;
       } on FirebaseAuthException catch (e) {
         print(e.message);
@@ -69,36 +71,6 @@ class _SignInPageState extends State<SignInPage> {
     return null;
   }
 
-  /*Future<User?> signInWithFacebook() async {
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-
-      if (result.status == LoginStatus.success) {
-        final AccessToken accessToken = result.accessToken!;
-        final AuthCredential credential = FacebookAuthProvider.credential(accessToken.token);
-
-        final UserCredential userCredential = await _auth.signInWithCredential(credential);
-        return userCredential.user;
-      } else {
-        print(result.status);
-        print(result.message);
-      }
-    } on FirebaseAuthException catch (e) {
-      print(e.message);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          content: Text(
-            e.message ?? "An error occurred",
-            style: TextStyle(fontSize: 18.0),
-          ),
-        ),
-      );
-    }
-    return null;
-  }
-
-*/
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -112,7 +84,8 @@ class _SignInPageState extends State<SignInPage> {
           children: [
             Text(
               'Sign In',
-              style: GoogleFonts.acme(fontSize: 30, fontWeight: FontWeight.w600),
+              style:
+                  GoogleFonts.acme(fontSize: 30, fontWeight: FontWeight.w600),
             ),
             SizedBox(
               height: 10,
@@ -132,7 +105,7 @@ class _SignInPageState extends State<SignInPage> {
                     },
                     controller: mailController,
                     decoration: InputDecoration(
-                        hintText: 'Username or email',
+                        hintText: 'email',
                         border: InputBorder.none,
                         prefixIcon: Icon(Icons.person)),
                   ),
@@ -153,11 +126,17 @@ class _SignInPageState extends State<SignInPage> {
                       return null;
                     },
                     controller: passwordController,
+                    obscureText: !_paaswordVisible,
                     decoration: InputDecoration(
                         hintText: 'Password',
                         border: InputBorder.none,
+                        suffixIcon: IconButton(icon: Icon(_paaswordVisible? Icons.visibility:Icons.visibility_off),onPressed: (){
+                          setState(() {
+                            _paaswordVisible=!_paaswordVisible;
+                          });
+                        },),
                         prefixIcon: Icon(Icons.key)),
-                    obscureText: true,
+
                   ),
                 ),
               ),
@@ -176,7 +155,10 @@ class _SignInPageState extends State<SignInPage> {
                         });
                       },
                     ),
-                    Text('Remember me'),
+                    Text(
+                      'Remember me',
+                      style: GoogleFonts.abyssinicaSil(),
+                    ),
                   ],
                 ),
                 TextButton(
@@ -187,7 +169,10 @@ class _SignInPageState extends State<SignInPage> {
                           builder: (context) => ForgotPassword(),
                         ));
                   },
-                  child: Text('Forgot Password?'),
+                  child: Text(
+                    'Forgot Password?',
+                    style: GoogleFonts.abyssinicaSil(),
+                  ),
                 ),
               ],
             ),
@@ -212,30 +197,30 @@ class _SignInPageState extends State<SignInPage> {
                 },
                 child: Text(
                   'Sign In',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  style:
+                      GoogleFonts.aclonica(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
             SizedBox(height: 8),
-            Text('Or', style: TextStyle(color: Colors.grey)),
+            Text('Or', style: GoogleFonts.abrilFatface(color: Colors.grey)),
             SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: () {
-                signInWithGoogle();
-              },
-              icon: Icon(Icons.login),
-              label: Text('Continue With Google'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+            Container(
+              width: screenWidth * 0.9,
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(10)),
+              child: TextButton.icon(
+                onPressed: () {
+                  signInWithGoogle();
+                },
+                icon: Icon(Icons.login),
+                label: Text('Continue With Google'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade100),
+              ),
             ),
-            ElevatedButton.icon(
-              onPressed: () {
-                //signInWithFacebook();
-              },
-              icon: Icon(Icons.facebook),
-              label: Text('Continue With Facebook'),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade100),
-            ),
+
           ],
         ),
       ),

@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'Home.dart';
+import 'package:user_authentication/terms_and_conditions.dart';
+import 'home.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -11,6 +12,8 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   String name = "", email = "", password = "";
   bool isChecked = false;
+  bool _passwordVisible=false;
+
 
   TextEditingController nameController = new TextEditingController();
 
@@ -34,7 +37,7 @@ class _SignUpPageState extends State<SignUpPage> {
         )));
         // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Home()));
+            context, MaterialPageRoute(builder: (context) => Home(user: userCredential.user!,)));
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -126,11 +129,18 @@ class _SignUpPageState extends State<SignUpPage> {
                     return null;
                   },
                   controller: passwordController,
+                  obscureText: !_passwordVisible,
                   decoration: InputDecoration(
                       hintText: 'Password',
                       border: InputBorder.none,
-                      prefixIcon: Icon(Icons.key)),
-                  obscureText: true,
+                      prefixIcon: Icon(Icons.key),
+                    suffixIcon: IconButton(icon: Icon(_passwordVisible? Icons.visibility:Icons.visibility_off),onPressed: (){
+                      setState(() {
+                        _passwordVisible=!_passwordVisible;
+                      });
+                    },),
+                  ),
+
                 ),
               ),
             ),
@@ -145,10 +155,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       });
                     }),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TermsAndConditionsPage(),));
+                  },
                   child: Text(
                     'I agree with Terms & Conditions',
-                    style: TextStyle(
+                    style: GoogleFonts.abyssinicaSil(
                       decoration: TextDecoration.underline,
                       color: Colors.blue,
                     ),
@@ -178,7 +190,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 child: Text(
                   'Create Account',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  style: GoogleFonts.aclonica(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
