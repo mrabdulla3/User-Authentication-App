@@ -20,6 +20,8 @@ Firebase Firestore: For data storage and real-time syncing.
 
 Screenshots:
 
+![IMG_20240709_123215](https://github.com/mrabdulla3/User-Authentication-App/assets/129673628/5621691b-dc17-445f-8792-730a7711b7a6)
+
 
 Future Improvements:
 
